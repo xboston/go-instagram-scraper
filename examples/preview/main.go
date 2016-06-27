@@ -6,6 +6,14 @@ import (
 	instagram "github.com/xboston/go-instagram/instagram"
 )
 
+var (
+	client *instagram.Client
+)
+
+func init() {
+	client = instagram.NewClient(nil)
+}
+
 func main() {
 
 	log.Println("Начали")
@@ -20,7 +28,6 @@ func main() {
 
 func user() {
 
-	client := instagram.NewClient(nil)
 	user, err := client.Users.Get("xboston")
 
 	if err != nil {
@@ -32,7 +39,6 @@ func user() {
 
 func media() {
 
-	client := instagram.NewClient(nil)
 	media, err := client.Media.Get("xboston")
 
 	if err != nil {
@@ -47,8 +53,7 @@ func media() {
 
 func tag() {
 
-	client := instagram.NewClient(nil)
-	tagMedia, err := client.Tag.Search("imiss")
+	tagMedia, err := client.Tag.Search("boobs")
 
 	if err != nil {
 		log.Fatal(err)
@@ -56,6 +61,11 @@ func tag() {
 
 	for _, item := range tagMedia.Tag.Media.Nodes {
 
-		log.Println(item.Caption, item.DisplaySrc)
+		log.Println("Media", item.DisplaySrc)
+	}
+
+	for _, item := range tagMedia.Tag.TopPosts.Nodes {
+
+		log.Println("TopPosts", item.DisplaySrc)
 	}
 }

@@ -1,9 +1,6 @@
 package instagram
 
-import (
-	"fmt"
-	"log"
-)
+import "fmt"
 
 const (
 	//tagSearch = "https://www.instagram.com/explore/tags/%s/?__a=1&max_id={max_id}"
@@ -18,8 +15,6 @@ type TagService struct {
 // Search - поиск по тегу
 func (s *TagService) Search(tag string) (*Tag, error) {
 	u := fmt.Sprintf(tagSearch, tag)
-
-	log.Println(u)
 
 	req, err := s.client.NewRequest("GET", u, "")
 	if err != nil {
