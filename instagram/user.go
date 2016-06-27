@@ -2,10 +2,6 @@ package instagram
 
 import "fmt"
 
-const (
-	accountJSONInfo = "https://www.instagram.com/%s/?__a=1"
-)
-
 // UsersService - сервис работы с юзером
 type UsersService struct {
 	client *Client
@@ -13,9 +9,8 @@ type UsersService struct {
 
 // Get - получение информации о юзере
 func (s *UsersService) Get(userLogin string) (*User, error) {
-	var u string
 
-	u = fmt.Sprintf(accountJSONInfo, userLogin)
+	u := fmt.Sprintf("/%s/?__a=1", userLogin)
 
 	req, err := s.client.NewRequest("GET", u, "")
 	if err != nil {

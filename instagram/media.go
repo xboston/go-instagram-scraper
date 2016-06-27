@@ -1,12 +1,6 @@
 package instagram
 
-import (
-	"fmt"
-)
-
-const (
-	accountMedias = "https://www.instagram.com/%s/media?max_id={max_id}"
-)
+import "fmt"
 
 // MediaService - сервис работы с медиа-данными
 type MediaService struct {
@@ -15,7 +9,9 @@ type MediaService struct {
 
 // Get - полученепи медиа-данных пользователя
 func (s *MediaService) Get(userLogin string) (*Media, error) {
-	u := fmt.Sprintf(accountMedias, userLogin)
+
+	u := fmt.Sprintf("/%s/media", userLogin) // ?max_id={max_id}
+
 	req, err := s.client.NewRequest("GET", u, "")
 	if err != nil {
 		return nil, err

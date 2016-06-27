@@ -2,28 +2,24 @@ package instagram
 
 import "fmt"
 
-const (
-	//tagSearch = "https://www.instagram.com/explore/tags/%s/?__a=1&max_id={max_id}"
-	tagSearch = "https://www.instagram.com/explore/tags/%s/?__a=1"
-)
-
 // TagService - сервис работы с тегами
 type TagService struct {
 	client *Client
 }
 
 // Search - поиск по тегу
-func (s *TagService) Search(tag string) (*Tag, error) {
-	u := fmt.Sprintf(tagSearch, tag)
+func (s *TagService) Search(tagName string) (*Tag, error) {
+
+	u := fmt.Sprintf("explore/tags/%s/?__a=1", tagName) // max_id={max_id}
 
 	req, err := s.client.NewRequest("GET", u, "")
 	if err != nil {
 		return nil, err
 	}
 
-	tagObj := new(Tag)
-	_, err = s.client.Do(req, tagObj)
-	return tagObj, err
+	tag := new(Tag)
+	_, err = s.client.Do(req, tag)
+	return tag, err
 }
 
 // Tag - медиа-данные по тегу
