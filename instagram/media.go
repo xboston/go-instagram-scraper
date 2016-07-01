@@ -1,6 +1,9 @@
 package instagram
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+)
 
 // MediaService - сервис работы с медиа-данными
 type MediaService struct {
@@ -56,6 +59,38 @@ func (s *MediaService) GetAll(userLogin string) (media *Media, err error) {
 	}
 
 	return
+}
+
+// GetAll - получение полного списка медиа-элементов пользователя
+func (s *MediaService) GetAll2(userLogin string, ch chan *Media) {
+
+	var (
+		media, moreMedia *Media
+		err              error
+	)
+
+	media, err = s.GetByLoginAndMaxId(userLogin, "")
+	moreAvailable := media.MoreAvailable
+
+	ch <- media
+
+	maxID := media.Items[len(media.Items)-1].ID
+
+	for moreAvailable {
+
+		moreMedia, err = s.GetByLoginAndMaxId(userLogin, maxID)
+
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+
+		log.Println("tick", maxID)
+		ch <- moreMedia
+
+		moreAvailable = moreMedia.MoreAvailable
+		maxID = moreMedia.Items[len(moreMedia.Items)-1].ID
+	}
+
 }
 
 // Media - инфомрация о медаи-данных пользователя
