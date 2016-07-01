@@ -18,11 +18,18 @@ func NewImage(imageURL string) (img *Image, err error) {
 		URL: url,
 	}
 
+	img.Clean()
+
 	return img, nil
 }
 
 type Image struct {
 	URL *url.URL
+}
+
+func (i *Image) String() string {
+
+	return i.Original()
 }
 
 func (i *Image) Clean() string {
