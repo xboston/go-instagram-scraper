@@ -3,6 +3,7 @@ package instagram
 import (
 	"fmt"
 	"log"
+	"sync"
 )
 
 // MediaService - сервис работы с медиа-данными
@@ -62,21 +63,33 @@ func (s *MediaService) GetAll(userLogin string) (media *Media, err error) {
 }
 
 // GetAllWithCallback - получение полного списка медиа-элементов пользователя с передачей его в пользовательскую функцию
-func (s *MediaService) GetAllWithCallback(userLogin string, m func(*Media)) {
+func (s *MediaService) GetAllWithCallback(userLogin string, mediaFunc func(*Media)) {
 
-	ch := make(chan *Media)
+	var wg sync.WaitGroup
+	wg.Add(1)
 
-	go func(s *MediaService, userLogin string, ch chan *Media) {
+	channelMedia := make(chan *Media)
+	defer close(channelMedia)
+
+	go func() {
+
+		defer wg.Done()
+
 		var (
 			media, moreMedia *Media
 			err              error
+			moreAvailable    bool
 		)
 
 		media, err = s.GetByLoginAndMaxId(userLogin, "")
-		moreAvailable := media.MoreAvailable
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 
-		ch <- media
+		wg.Add(1)
+		channelMedia <- media
 
+		moreAvailable = media.MoreAvailable
 		maxID := media.Items[len(media.Items)-1].ID
 
 		for moreAvailable {
@@ -87,19 +100,29 @@ func (s *MediaService) GetAllWithCallback(userLogin string, m func(*Media)) {
 				log.Fatal(err.Error())
 			}
 
-			ch <- moreMedia
+			wg.Add(1)
+			channelMedia <- moreMedia
 
 			moreAvailable = moreMedia.MoreAvailable
 			maxID = moreMedia.Items[len(moreMedia.Items)-1].ID
 		}
-	}(s, userLogin, ch)
 
-	go func(c chan *Media) {
+	}()
+
+	// for media := range channelMedia {
+	// 	mediaFunc(media)
+	// 	wg.Done()
+	// }
+
+	go func() {
 		for {
-			media := <-c
-			m(media)
+			media := <-channelMedia
+			mediaFunc(media)
+			wg.Done()
 		}
-	}(ch)
+	}()
+
+	wg.Wait()
 }
 
 // Media - инфомрация о медаи-данных пользователя

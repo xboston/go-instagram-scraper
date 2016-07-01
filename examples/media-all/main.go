@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	instagram "github.com/xboston/go-instagram/instagram"
@@ -46,8 +45,11 @@ func media() {
 
 func mediaAllWithCallback() {
 
+	p := 0
+
 	m := func(media *instagram.Media) {
-		n := 0
+		n := p
+
 		for _, item := range media.Items {
 			n = n + 1
 
@@ -55,10 +57,8 @@ func mediaAllWithCallback() {
 
 			log.Println(n, ":", img)
 		}
+		p = n
 	}
 
 	client.Media.GetAllWithCallback("xboston", m)
-
-	var input string
-	fmt.Scanln(&input)
 }
