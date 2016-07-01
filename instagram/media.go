@@ -7,19 +7,55 @@ type MediaService struct {
 	client *Client
 }
 
-// Get - полученепи медиа-данных пользователя
-func (s *MediaService) Get(userLogin string) (*Media, error) {
+func (s *MediaService) GetByLoginAndMaxId(userLogin, maxID string) (media *Media, err error) {
 
-	u := fmt.Sprintf("/%s/media", userLogin) // ?max_id={max_id}
+	var u string
+
+	if maxID != "" {
+		u = fmt.Sprintf("/%s/media?max_id=%s", userLogin, maxID)
+	} else {
+		u = fmt.Sprintf("/%s/media", userLogin)
+	}
 
 	req, err := s.client.NewRequest("GET", u, "")
 	if err != nil {
 		return nil, err
 	}
 
-	media := new(Media)
-	_, err = s.client.Do(req, media)
+	_, err = s.client.Do(req, &media)
 	return media, err
+}
+
+// Get - получение медиа-элементов пользователя
+func (s *MediaService) Get(userLogin string) (media *Media, err error) {
+
+	media, err = s.GetByLoginAndMaxId(userLogin, "")
+	return
+}
+
+// GetAll - получение полного списка медиа-элементов пользователя
+func (s *MediaService) GetAll(userLogin string) (media *Media, err error) {
+
+	media, err = s.GetByLoginAndMaxId(userLogin, "")
+	moreAvailable := media.MoreAvailable
+
+	for moreAvailable {
+
+		maxID := media.Items[len(media.Items)-1].ID
+
+		moreMedia, err := s.GetByLoginAndMaxId(userLogin, maxID)
+
+		if err != nil {
+			return media, err
+		}
+
+		media.Items = append(media.Items, moreMedia.Items...)
+
+		moreAvailable = moreMedia.MoreAvailable
+		maxID = moreMedia.Items[len(moreMedia.Items)-1].ID
+	}
+
+	return
 }
 
 // Media - инфомрация о медаи-данных пользователя
@@ -88,29 +124,3 @@ type Media struct {
 	MoreAvailable bool   `json:"more_available"`
 	Status        string `json:"status"`
 }
-
-func (m *Media) getImages() {
-	//  $instance->imageHighResolutionUrl = str_replace('320x320', '1080x1080', $instance->imageLowResolutionUrl);
-	//     if (isset($mediaArray['caption'])) {
-	//         $instance->caption = $mediaArray['caption']['text'];
-	//     }
-	// if ($instance->type === 'video') {
-
-	// }
-}
-
-func (m *Media) getVideo() {
-	// $instance->imageHighResolutionUrl = str_replace('320x320', '1080x1080', $instance->imageLowResolutionUrl);
-	//     if (isset($mediaArray['caption'])) {
-	//         $instance->caption = $mediaArray['caption']['text'];
-	//     }
-	// if ($instance->type !== 'video') {
-	//     $instance->videoLowResolutionUrl = $mediaArray['videos']['low_resolution']['url'];
-	//     $instance->videoStandardResolutionUrl = $mediaArray['videos']['standard_resolution']['url'];
-	//     $instance->videoLowBandwidthUrl = $mediaArray['videos']['low_bandwidth']['url'];
-	// }
-}
-
-// return strpos($imageUrl, '?ig_cache_key=') ? substr($imageUrl, 0, strpos($imageUrl, '?ig_cache_key=')) : $imageUrl;
-// Максимально доступное качество фото можно получить, удалив все кроме /t/ из ссылки — https://scontent.cdninstagram.com/t/12950481_1753078061593396_874826488_n.jpg, через параметры в ссылке можно управлять размером и кропом.
-// или вот так: https://instagram.com/p/9BDXa_L7bm/media/?size=l
