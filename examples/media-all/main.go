@@ -19,7 +19,7 @@ func main() {
 
 	log.Println("Начали")
 
-	media2()
+	mediaAllWithCallback()
 
 	log.Println("Закончили")
 }
@@ -44,27 +44,20 @@ func media() {
 	log.Println("media.count", len(media.Items))
 }
 
-func media2() {
+func mediaAllWithCallback() {
 
-	ch := make(chan *instagram.Media)
+	m := func(media *instagram.Media) {
+		n := 0
+		for _, item := range media.Items {
+			n = n + 1
 
-	go client.Media.GetAll2("100tskaya", ch)
+			img, _ := instagram.NewImage(item.Images.StandardResolution.URL)
 
-	go func(c chan *instagram.Media) {
-		for {
-			media := <-c
-
-			log.Println("get", media.MoreAvailable)
-
-			// n := 0
-			// for _, item := range media.Items {
-			// 	n = n + 1
-
-			// 	img, _ := instagram.NewImage(item.Images.StandardResolution.URL)
-			// 	log.Println(n, ":", img)
-			// }
+			log.Println(n, ":", img)
 		}
-	}(ch)
+	}
+
+	client.Media.GetAllWithCallback("xboston", m)
 
 	var input string
 	fmt.Scanln(&input)

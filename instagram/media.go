@@ -61,36 +61,45 @@ func (s *MediaService) GetAll(userLogin string) (media *Media, err error) {
 	return
 }
 
-// GetAll - получение полного списка медиа-элементов пользователя
-func (s *MediaService) GetAll2(userLogin string, ch chan *Media) {
+// GetAllWithCallback - получение полного списка медиа-элементов пользователя с передачей его в пользовательскую функцию
+func (s *MediaService) GetAllWithCallback(userLogin string, m func(*Media)) {
 
-	var (
-		media, moreMedia *Media
-		err              error
-	)
+	ch := make(chan *Media)
 
-	media, err = s.GetByLoginAndMaxId(userLogin, "")
-	moreAvailable := media.MoreAvailable
+	go func(s *MediaService, userLogin string, ch chan *Media) {
+		var (
+			media, moreMedia *Media
+			err              error
+		)
 
-	ch <- media
+		media, err = s.GetByLoginAndMaxId(userLogin, "")
+		moreAvailable := media.MoreAvailable
 
-	maxID := media.Items[len(media.Items)-1].ID
+		ch <- media
 
-	for moreAvailable {
+		maxID := media.Items[len(media.Items)-1].ID
 
-		moreMedia, err = s.GetByLoginAndMaxId(userLogin, maxID)
+		for moreAvailable {
 
-		if err != nil {
-			log.Fatal(err.Error())
+			moreMedia, err = s.GetByLoginAndMaxId(userLogin, maxID)
+
+			if err != nil {
+				log.Fatal(err.Error())
+			}
+
+			ch <- moreMedia
+
+			moreAvailable = moreMedia.MoreAvailable
+			maxID = moreMedia.Items[len(moreMedia.Items)-1].ID
 		}
+	}(s, userLogin, ch)
 
-		log.Println("tick", maxID)
-		ch <- moreMedia
-
-		moreAvailable = moreMedia.MoreAvailable
-		maxID = moreMedia.Items[len(moreMedia.Items)-1].ID
-	}
-
+	go func(c chan *Media) {
+		for {
+			media := <-c
+			m(media)
+		}
+	}(ch)
 }
 
 // Media - инфомрация о медаи-данных пользователя
