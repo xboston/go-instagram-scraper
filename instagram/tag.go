@@ -1,6 +1,10 @@
 package instagram
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+	"net/http"
+)
 
 // TagService - сервис работы с тегами
 type TagService struct {
@@ -8,7 +12,7 @@ type TagService struct {
 }
 
 // Search - поиск по тегу
-func (s *TagService) Search(tagName string) (*Tag, error) {
+func (s *TagService) Search(tagName string) (tag *Tag, err error) {
 
 	u := fmt.Sprintf("explore/tags/%s/?__a=1", tagName) // max_id={max_id}
 
@@ -17,8 +21,11 @@ func (s *TagService) Search(tagName string) (*Tag, error) {
 		return nil, err
 	}
 
-	tag := new(Tag)
-	_, err = s.client.Do(req, tag)
+	resp, err := s.client.Do(req, &tag)
+
+	if http.StatusOK != resp.StatusCode {
+		return nil, errors.New("Tag not found")
+	}
 	return tag, err
 }
 

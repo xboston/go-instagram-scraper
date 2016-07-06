@@ -35,6 +35,14 @@ func user() {
 	}
 
 	log.Println(user.User.Username, user.User.FullName, user.User.FollowedBy.Count)
+
+	user, err = client.Users.Get("-nonexistent-user-")
+
+	if err != nil {
+		log.Println(err)
+	} else {
+		log.Println(user.User.Username, user.User.FullName, user.User.FollowedBy.Count)
+	}
 }
 
 func media() {

@@ -21,9 +21,9 @@ func (s *UsersService) Get(userLogin string) (user *User, err error) {
 		return nil, err
 	}
 
-	resp, err := s.client.Do(req, user)
+	resp, err := s.client.Do(req, &user)
 	if http.StatusOK != resp.StatusCode {
-		return user, errors.New("User not found")
+		return nil, errors.New("User not found")
 	}
 
 	return user, err

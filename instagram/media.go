@@ -1,8 +1,10 @@
 package instagram
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"sync"
 )
 
@@ -27,7 +29,12 @@ func (s *MediaService) GetByLoginAndMaxID(userLogin, maxID string) (media *Media
 		return nil, err
 	}
 
-	_, err = s.client.Do(req, &media)
+	resp, err := s.client.Do(req, &media)
+
+	if http.StatusOK != resp.StatusCode {
+		return nil, errors.New("Media not found")
+	}
+
 	return media, err
 }
 
