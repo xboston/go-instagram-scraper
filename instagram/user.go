@@ -1,6 +1,10 @@
 package instagram
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+	"net/http"
+)
 
 // UsersService - сервис работы с юзером
 type UsersService struct {
@@ -8,7 +12,7 @@ type UsersService struct {
 }
 
 // Get - получение информации о юзере
-func (s *UsersService) Get(userLogin string) (*User, error) {
+func (s *UsersService) Get(userLogin string) (user *User, err error) {
 
 	u := fmt.Sprintf("/%s/?__a=1", userLogin)
 
@@ -17,8 +21,11 @@ func (s *UsersService) Get(userLogin string) (*User, error) {
 		return nil, err
 	}
 
-	user := new(User)
-	_, err = s.client.Do(req, user)
+	resp, err := s.client.Do(req, user)
+	if http.StatusOK != resp.StatusCode {
+		return user, errors.New("User not found")
+	}
+
 	return user, err
 }
 
