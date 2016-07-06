@@ -11,7 +11,8 @@ type MediaService struct {
 	client *Client
 }
 
-func (s *MediaService) GetByLoginAndMaxId(userLogin, maxID string) (media *Media, err error) {
+// GetByLoginAndMaxID - получение медиа-элементов пользователя по логину и max_id
+func (s *MediaService) GetByLoginAndMaxID(userLogin, maxID string) (media *Media, err error) {
 
 	var u string
 
@@ -33,21 +34,21 @@ func (s *MediaService) GetByLoginAndMaxId(userLogin, maxID string) (media *Media
 // Get - получение медиа-элементов пользователя
 func (s *MediaService) Get(userLogin string) (media *Media, err error) {
 
-	media, err = s.GetByLoginAndMaxId(userLogin, "")
+	media, err = s.GetByLoginAndMaxID(userLogin, "")
 	return
 }
 
 // GetAll - получение полного списка медиа-элементов пользователя
 func (s *MediaService) GetAll(userLogin string) (media *Media, err error) {
 
-	media, err = s.GetByLoginAndMaxId(userLogin, "")
+	media, err = s.GetByLoginAndMaxID(userLogin, "")
 	moreAvailable := media.MoreAvailable
 
 	for moreAvailable {
 
 		maxID := media.Items[len(media.Items)-1].ID
 
-		moreMedia, err := s.GetByLoginAndMaxId(userLogin, maxID)
+		moreMedia, err := s.GetByLoginAndMaxID(userLogin, maxID)
 
 		if err != nil {
 			return media, err
@@ -81,7 +82,7 @@ func (s *MediaService) GetAllWithCallback(userLogin string, mediaFunc func(*Medi
 			moreAvailable    bool
 		)
 
-		media, err = s.GetByLoginAndMaxId(userLogin, "")
+		media, err = s.GetByLoginAndMaxID(userLogin, "")
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -94,7 +95,7 @@ func (s *MediaService) GetAllWithCallback(userLogin string, mediaFunc func(*Medi
 
 		for moreAvailable {
 
-			moreMedia, err = s.GetByLoginAndMaxId(userLogin, maxID)
+			moreMedia, err = s.GetByLoginAndMaxID(userLogin, maxID)
 
 			if err != nil {
 				log.Fatal(err.Error())
@@ -108,11 +109,6 @@ func (s *MediaService) GetAllWithCallback(userLogin string, mediaFunc func(*Medi
 		}
 
 	}()
-
-	// for media := range channelMedia {
-	// 	mediaFunc(media)
-	// 	wg.Done()
-	// }
 
 	go func() {
 		for {
@@ -128,9 +124,9 @@ func (s *MediaService) GetAllWithCallback(userLogin string, mediaFunc func(*Medi
 // Media - инфомрация о медаи-данных пользователя
 type Media struct {
 	Items []struct {
-		AltMediaURL       interface{} `json:"alt_media_url"`
-		CanDeleteComments bool        `json:"can_delete_comments"`
-		CanViewComments   bool        `json:"can_view_comments"`
+		AltMediaURL       string `json:"alt_media_url"`
+		CanDeleteComments bool   `json:"can_delete_comments"`
+		CanViewComments   bool   `json:"can_view_comments"`
 		Caption           struct {
 			CreatedTime string `json:"created_time"`
 			From        struct {
@@ -144,8 +140,18 @@ type Media struct {
 		} `json:"caption"`
 		Code     string `json:"code"`
 		Comments struct {
-			Count int           `json:"count"`
-			Data  []interface{} `json:"data"`
+			Count int `json:"count"`
+			Data  []struct {
+				CreatedTime string `json:"created_time"`
+				From        struct {
+					FullName       string `json:"full_name"`
+					ID             string `json:"id"`
+					ProfilePicture string `json:"profile_picture"`
+					Username       string `json:"username"`
+				} `json:"from"`
+				ID   string `json:"id"`
+				Text string `json:"text"`
+			} `json:"data"`
 		} `json:"comments"`
 		CreatedTime string `json:"created_time"`
 		ID          string `json:"id"`
@@ -175,18 +181,34 @@ type Media struct {
 				Username       string `json:"username"`
 			} `json:"data"`
 		} `json:"likes"`
-		Link     string `json:"link"`
-		Location struct {
-			Name string `json:"name"`
-		} `json:"location"`
-		Type string `json:"type"`
-		User struct {
+		Link     string      `json:"link"`
+		Location interface{} `json:"location"`
+		Type     string      `json:"type"`
+		User     struct {
 			FullName       string `json:"full_name"`
 			ID             string `json:"id"`
 			ProfilePicture string `json:"profile_picture"`
 			Username       string `json:"username"`
 		} `json:"user"`
 		UserHasLiked bool `json:"user_has_liked"`
+		VideoViews   int  `json:"video_views"`
+		Videos       struct {
+			LowBandwidth struct {
+				Height int    `json:"height"`
+				URL    string `json:"url"`
+				Width  int    `json:"width"`
+			} `json:"low_bandwidth"`
+			LowResolution struct {
+				Height int    `json:"height"`
+				URL    string `json:"url"`
+				Width  int    `json:"width"`
+			} `json:"low_resolution"`
+			StandardResolution struct {
+				Height int    `json:"height"`
+				URL    string `json:"url"`
+				Width  int    `json:"width"`
+			} `json:"standard_resolution"`
+		} `json:"videos"`
 	} `json:"items"`
 	MoreAvailable bool   `json:"more_available"`
 	Status        string `json:"status"`
