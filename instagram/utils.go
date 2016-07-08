@@ -21,7 +21,7 @@ func GetProfileByURL(profileURL string) (profileName *string, err error) {
 		return nil, err
 	}
 
-	if "instagram.com" != u.Host {
+	if "instagram.com" != u.Host && "www.instagram.com" != u.Host {
 		return nil, errors.New("Host error")
 	}
 

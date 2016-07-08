@@ -23,7 +23,9 @@ func TestGetProfileByURL(t *testing.T) {
 		{in: "HTTP://instagram.com/username", out: "username"},
 		{in: "HTTPs://instagram.com/username", out: "username"},
 		{in: "instagram.com/username", out: "username"},
+		{in: "www.instagram.com/username", out: "username"},
 		{in: "//instagram.com/username", out: "username"},
+		{in: "https://www.instagram.com/username/?test=test", out: "username"},
 	}
 
 	for _, tt := range tests {
