@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 )
 
@@ -126,6 +127,33 @@ func (s *MediaService) GetAllWithCallback(userLogin string, mediaFunc func(*Medi
 	}()
 
 	wg.Wait()
+}
+
+// Exist - проверка существования медиа
+func (s *MediaService) Exist(mediaID string) (bool, error) {
+
+	mediaID = strings.TrimSpace(mediaID)
+
+	if mediaID == "" {
+		return false, errors.New("mediaID empty")
+	}
+
+	u := fmt.Sprintf("/p/%s/?__a=1", mediaID)
+
+	req, err := s.client.NewRequest("GET", u, "")
+	if err != nil {
+		return false, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+
+	log.Println(resp.Request.URL, resp.StatusCode)
+
+	if http.StatusOK != resp.StatusCode {
+		return false, errors.New("Media not exist")
+	}
+
+	return true, nil
 }
 
 // Media - инфомрация о медаи-данных пользователя
