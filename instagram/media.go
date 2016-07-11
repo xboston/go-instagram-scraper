@@ -147,10 +147,8 @@ func (s *MediaService) Exist(mediaID string) (bool, error) {
 
 	resp, err := s.client.Do(req, nil)
 
-	log.Println(resp.Request.URL, resp.StatusCode)
-
 	if http.StatusOK != resp.StatusCode {
-		return false, errors.New("Media not exist")
+		return false, fmt.Errorf("Media %s not exist", mediaID)
 	}
 
 	return true, nil
