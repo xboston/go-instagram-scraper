@@ -107,7 +107,7 @@ func (i Image) StandartSquare() string {
 func (i Image) ThumbnailSquareSize(w, h uint) string {
 
 	size := fmt.Sprintf("s%dx%d", w, h)
-	i.URL.Path = strings.Replace(i.URL.Path, "150x150", size, -1)
+	i.URL.Path = strings.Replace(i.URL.Path, "s150x150", size, -1)
 
 	return i.URL.String()
 }
