@@ -26,7 +26,7 @@ func NewImage(imageURL string) (img *Image, err error) {
 
 func NewImageFromThumbnail(imageURL string) (img *Image, err error) {
 
-	if !strings.Contains(imageURL, "s150x150/e35/c") {
+	if !strings.Contains(imageURL, "s150x150/e35/") {
 		return img, errors.New("No thumbnail url")
 	}
 
@@ -37,8 +37,7 @@ func NewImageFromThumbnail(imageURL string) (img *Image, err error) {
 	}
 
 	img = &Image{
-		URL:         *url,
-		isThumbnail: true,
+		URL: *url,
 	}
 
 	img.Clean()
@@ -47,8 +46,7 @@ func NewImageFromThumbnail(imageURL string) (img *Image, err error) {
 }
 
 type Image struct {
-	URL         url.URL
-	isThumbnail bool
+	URL url.URL
 }
 
 func (i Image) String() string {
