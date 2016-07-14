@@ -27,6 +27,7 @@ type Client struct {
 	Users *UsersService
 	Media *MediaService
 	Tag   *TagService
+	Query *QueryService
 }
 
 // NewClient returns a new Instagram API client.  If a nil httpClient is
@@ -48,6 +49,7 @@ func NewClient(httpClient *http.Client) *Client {
 	c.Users = &UsersService{client: c}
 	c.Media = &MediaService{client: c}
 	c.Tag = &TagService{client: c}
+	c.Query = &QueryService{client: c}
 
 	return c
 }
