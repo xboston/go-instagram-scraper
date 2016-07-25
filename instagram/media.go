@@ -154,6 +154,27 @@ func (s *MediaService) Exist(mediaID string) (bool, error) {
 	return true, nil
 }
 
+// FileExist - проверка физического существования файла медиа
+func (s *MediaService) FileExist(mediaFile string) (bool, error) {
+
+	if mediaFile == "" {
+		return false, errors.New("mediaFile empty")
+	}
+
+	req, err := s.client.NewRequest("HEAD", mediaFile, "")
+	if err != nil {
+		return false, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+
+	if http.StatusOK != resp.StatusCode {
+		return false, fmt.Errorf("Mediafile %s not exist", mediaFile)
+	}
+
+	return true, nil
+}
+
 // Media - инфомрация о медаи-данных пользователя
 type Media struct {
 	Items []struct {
