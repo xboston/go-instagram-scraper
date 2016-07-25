@@ -26,7 +26,7 @@ func NewImage(imageURL string) (img *Image, err error) {
 
 func NewImageFromThumbnail(imageURL string) (img *Image, err error) {
 
-	if !strings.Contains(imageURL, "s150x150/e35/") {
+	if !strings.Contains(imageURL, "s150x150") {
 		return img, errors.New("No thumbnail url")
 	}
 

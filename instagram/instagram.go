@@ -9,10 +9,9 @@ import (
 )
 
 const (
-	defaultBaseURL = "https://api.github.com/"
-	baseURL        = "https://www.instagram.com"
+	baseURL = "https://www.instagram.com"
 	// Version - версия
-	libraryVersion = "1.0.0"
+	libraryVersion = "1.0.1"
 	// UserAgent - строка UserAgent
 	userAgent = "github.com/xboston/go-instagram " + libraryVersion
 )

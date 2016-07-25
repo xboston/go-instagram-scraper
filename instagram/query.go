@@ -6,10 +6,6 @@ import (
 	"net/http"
 )
 
-var (
-	gu = `/query/?q=ig_user(%d){username}`
-)
-
 // QueryService - сервис работы с запросами query
 type QueryService struct {
 	client *Client
@@ -18,7 +14,11 @@ type QueryService struct {
 // GetUsernameByID - получение профиля пользователя по ID
 func (s *QueryService) GetUsernameByID(id uint) (username string, err error) {
 
-	data, err := s.get(gu, id)
+	data, err := s.get("/query/?q=ig_user(%d){username}", id)
+
+	if err != nil {
+		return
+	}
 
 	if _, ok := data["username"]; !ok {
 		return username, errors.New("User not found")
@@ -39,7 +39,7 @@ func (s *QueryService) get(query string, params ...interface{}) (data map[string
 	resp, err := s.client.Do(req, &data)
 
 	if http.StatusOK != resp.StatusCode {
-		return nil, errors.New("Error in query")
+		return nil, errors.New("429")
 	}
 
 	if _, ok := data["ok"]; !ok {
